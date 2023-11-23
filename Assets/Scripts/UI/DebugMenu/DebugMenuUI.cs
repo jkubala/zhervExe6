@@ -2,19 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary> Helper behavior which manages the debug UI. </summary>
 public class DebugMenuUI : MonoBehaviour
 {
-#region Editor
+    #region Editor
 
-    [ Header("Global") ]
+    [Header("Global")]
     [Tooltip("Display the debug UI?")]
     public bool displayUI;
-    
-#endregion // Editor
 
-#region Internal
+    #endregion // Editor
+
+    #region Internal
 
     /// <summary> Dimensions of the main window. </summary>
     private static Vector2 WINDOW_DIMENSION = new Vector2(256.0f, 192.0f);
@@ -28,12 +29,12 @@ public class DebugMenuUI : MonoBehaviour
 
     /// <summary> Dummy value used for demonstration. </summary>
     private float mDummyValue = 0.0f;
-    
-#endregion // Internal
 
-#region Interface
+    #endregion // Internal
 
-#endregion // Interface
+    #region Interface
+
+    #endregion // Interface
 
     /// <summary> Called when the script instance is first loaded. </summary>
     private void Awake()
@@ -45,14 +46,14 @@ public class DebugMenuUI : MonoBehaviour
         // Deduce the drawing screen area from the main camera.
         var mainCamera = GameSettings.Instance.mainCamera;
         mScreenRect = new Rect(
-            mainCamera.rect.x * Screen.width, 
-            mainCamera.rect.y * Screen.height, 
-            mainCamera.rect.width * Screen.width, 
+            mainCamera.rect.x * Screen.width,
+            mainCamera.rect.y * Screen.height,
+            mainCamera.rect.width * Screen.width,
             mainCamera.rect.height * Screen.height
         );
         // Initially place the debug window into the top right corner.
         mMainWindowRect = new Rect(
-            mScreenRect.x + mScreenRect.width - WINDOW_DIMENSION.x, mScreenRect.y, 
+            mScreenRect.x + mScreenRect.width - WINDOW_DIMENSION.x, mScreenRect.y,
             WINDOW_DIMENSION.x, WINDOW_DIMENSION.y
         );
     }
@@ -69,11 +70,11 @@ public class DebugMenuUI : MonoBehaviour
             mMainWindowRect = GUI.Window(0, mMainWindowRect, MainWindowUI, "Cheat Console");
             // Limit the window position to the screen area.
             mMainWindowRect.x = Mathf.Clamp(
-                mMainWindowRect.x, mScreenRect.x, 
+                mMainWindowRect.x, mScreenRect.x,
                 mScreenRect.x + mScreenRect.width - WINDOW_DIMENSION.x
             );
             mMainWindowRect.y = Mathf.Clamp(
-                mMainWindowRect.y, mScreenRect.y, 
+                mMainWindowRect.y, mScreenRect.y,
                 mScreenRect.y + mScreenRect.height - WINDOW_DIMENSION.y
             );
         }
@@ -84,18 +85,18 @@ public class DebugMenuUI : MonoBehaviour
     {
         // Start the window drawing area, starting with some padding.
         GUILayout.BeginArea(new Rect(
-            BASE_PADDING, 2.0f * BASE_PADDING, 
-            WINDOW_DIMENSION.x - 2.0f * BASE_PADDING, 
+            BASE_PADDING, 2.0f * BASE_PADDING,
+            WINDOW_DIMENSION.x - 2.0f * BASE_PADDING,
             WINDOW_DIMENSION.y - 3.0f * BASE_PADDING
         ));
         { // Main Window Area
-            
-            
+
+
             // GUILayout allows us to automatically place UI elements after each other.
             // BeginVertical starts a vertical group, while BeginHorizontal a horizontal one.
             GUILayout.BeginVertical();
             {
-                
+
                 /*
                  * Task 3b: The Cheat
                  *
@@ -137,11 +138,19 @@ public class DebugMenuUI : MonoBehaviour
                     if (GUI.changed)
                     { InventoryManager.Instance.availableCurrency = currency; }
                  */
-                
-                
-                
-                
-                
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label("Currency: ", GUILayout.Width(WINDOW_DIMENSION.x / 4.0f));
+                    var currency = InventoryManager.Instance.availableCurrency;
+                    currency = (int)GUILayout.HorizontalSlider(currency, 0.0f, 1000.0f, GUILayout.ExpandWidth(true));
+                    if (GUI.changed)
+                    { InventoryManager.Instance.availableCurrency = currency; }
+                }
+                GUILayout.EndHorizontal();
+
+
+
+
                 /*
                  * Task 3c: The Tool
                  *
@@ -159,23 +168,46 @@ public class DebugMenuUI : MonoBehaviour
                  *
                  * For this task, it may be useful to look at what elements are available:
                  * https://docs.unity3d.com/2021.2/Documentation/Manual/gui-Controls.html
-                 * , but nota that you will probably want to use GUILayout instead of "GUI".
+                 * , but note that you will probably want to use GUILayout instead of "GUI".
                  *
                  * This task can be considered as completed once all three handles can
                  * be controlled from the Cheat Console.
                  */
-                
-                
-                
-                
-                
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label("Interact: ", GUILayout.Width(WINDOW_DIMENSION.x / 4.0f));
+                    bool interactiveMode = GameManager.Instance.interactiveMode;
+                    interactiveMode = GUILayout.Toggle(interactiveMode, "");
+                    GameManager.Instance.interactiveMode = interactiveMode;
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label("Volume: ", GUILayout.Width(WINDOW_DIMENSION.x / 4.0f));
+                    if (GUILayout.Button("M"))
+                    {
+                        SoundManager.Instance.masterMuted = !SoundManager.Instance.masterMuted;
+                    }
+                    float volume = SoundManager.Instance.masterVolume;
+                    volume = (int)GUILayout.HorizontalSlider(volume, -80.0f, 20.0f, GUILayout.ExpandWidth(true));
+                    if (!SoundManager.Instance.masterMuted)
+                    {
+                        SoundManager.Instance.masterVolume = volume;
+                    }
+                }
+                GUILayout.EndHorizontal();
+
+
+
                 // Placing the elements next to each other.
                 GUILayout.BeginHorizontal();
                 {
                     for (var iii = 1; iii <= 10; ++iii)
                     { // Create a set of 10 sliders all sharing the same value.
                         mDummyValue = GUILayout.VerticalSlider(
-                            mDummyValue, 0.0f, 10.0f * iii, 
+                            mDummyValue, 0.0f, 10.0f * iii,
                             GUILayout.ExpandHeight(true)
                         );
                     }
@@ -193,25 +225,25 @@ public class DebugMenuUI : MonoBehaviour
                      * it was pressed. So, all you need to do is place the character-enabling
                      * code into the if statement and voila!
                      */
-                    if (GUILayout.Button("Enable\nDummy\nCharacter", 
-                        GUILayout.ExpandWidth(true), 
+                    if (GUILayout.Button("Enable\nDummy\nCharacter",
+                        GUILayout.ExpandWidth(true),
                         GUILayout.ExpandHeight(true)))
-                    { /* Fill the code here! */ }
+                    { GameManager.Instance.TogglePlayerCharacter(); }
                 }
                 GUILayout.EndHorizontal();
                 // Do not forget to end each group in the correct order!
             }
             GUILayout.EndVertical();
             // End the group!
-            
-            
+
+
         } // End of Main Window Area
         GUILayout.EndArea();
-        
+
         // Allow dragging of the window by grabbing any part of it.
         GUI.DragWindow(new Rect(
-            2.0f * BASE_PADDING,0.0f,
-            WINDOW_DIMENSION.x - 4.0f * BASE_PADDING, 
+            2.0f * BASE_PADDING, 0.0f,
+            WINDOW_DIMENSION.x - 4.0f * BASE_PADDING,
             WINDOW_DIMENSION.y
         ));
     }

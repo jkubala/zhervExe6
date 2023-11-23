@@ -39,8 +39,8 @@
                     <ui:ScrollView name="ItemDetailView" style="flex-grow: 1; max-height: 65%; padding-top: 10px; height: 65%; min-height: 65%;">
                         <ui:Label text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec tempor tellus. Integer a lorem id arcu condimentum porttitor. Aenean vitae ante lectus. Morbi in libero vitae lorem blandit mollis eleifend ac mauris." display-tooltip-when-elided="true" name="ItemDetailDescription" style="flex-grow: 1; padding-top: 0; font-size: 16%; white-space: normal; -unity-text-align: upper-left; color: rgb(210, 210, 210); flex-shrink: 0; padding-left: 0; padding-right: 0; padding-bottom: 0; height: 100%;" />
                     </ui:ScrollView>
-                    <ui:VisualElement name="ItemDetailButtonContainer" style="height: 10%; max-height: 64px; flex-direction: column; flex-grow: 1; justify-content: flex-end; flex-shrink: 0; min-height: 32px;">
-                        <ui:Button text="CREATE" display-tooltip-when-elided="true" name="ItemDetailButtonCreate" class="button" style="position: relative; width: 100%; height: 50%; flex-grow: 0; font-size: 18%;" />
+                    <ui:VisualElement style="height: 10%; max-height: 64px; flex-direction: column; flex-grow: 1; justify-content: flex-end; flex-shrink: 0; min-height: 32px;">
+                        <ui:Button text="CREATE" display-tooltip-when-elided="true" name="Button" class="button" style="position: relative; width: 100%; height: 50%; flex-grow: 0; font-size: 18%;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="Inventory" style="flex-grow: 1; align-items: center; justify-content: center; margin-right: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">

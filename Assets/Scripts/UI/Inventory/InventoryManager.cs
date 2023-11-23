@@ -11,28 +11,28 @@ using JetBrains.Annotations;
 /// <summary> Primary user interface manager. </summary>
 public class InventoryManager : MonoBehaviour
 {
-#region Editor
+    #region Editor
 
-    [ Header("Game Objects") ]
-    
+    [Header("Game Objects")]
+
     [Tooltip("Preview grid for the inventory.")]
     public GameObject previewGridGameObject;
     [Tooltip("Target under which items should be created.")]
     public GameObject createDestination;
     [Tooltip("Main scene camera")]
     public GameObject mainCamera;
-    
-    [ Header("Inventory Settings") ]
+
+    [Header("Inventory Settings")]
     [Tooltip("Show highlight even when outside of the inventory area?")]
     public bool highlightWhenOutside = true;
-    
-#endregion // Editor
 
-#region Internal
-    
+    #endregion // Editor
+
+    #region Internal
+
     /// <summary> Singleton instance of the UIManager. </summary>
     private static InventoryManager sInstance;
-    
+
     /// <summary> Getter for the singleton UIManager object. </summary>
     public static InventoryManager Instance
     { get { return sInstance; } }
@@ -41,10 +41,10 @@ public class InventoryManager : MonoBehaviour
     private VisualElement mRoot;
     /// <summary> Root element of the inventory grid. </summary>
     private VisualElement mInventoryGrid;
-    
+
     /// <summary> Label displaying the current amount of currency. </summary>
     private Label mCurrencyValue;
-    
+
     /// <summary> Label displaying the item name. </summary>
     private Label mItemDetailName;
     /// <summary> Label displaying the item description. </summary>
@@ -53,33 +53,33 @@ public class InventoryManager : MonoBehaviour
     private Label mItemDetailCost;
     /// <summary> The item creation button. </summary>
     private Button mItemCreateButton;
-    
+
     /// <summary> Element used to highlight the selected grid location. </summary>
     private VisualElement mGridHighlight;
 
     /// <summary> List of items currently within the inventory grid. </summary>
     private List<VisualElement> mCurrentItems = new List<VisualElement>();
-    
+
     /// <summary> Currently available currency. </summary>
     private int mAvailableCurrency = 42;
-    
-#endregion // Internal
 
-#region Interface
+    #endregion // Internal
+
+    #region Interface
 
     /// <summary> Id the inventory initialized and ready for use? </summary>
     public bool inventoryReady
     { get; private set; }
     /// <summary> Dimension of a single item slot in pixels. </summary>
-    public Vector2Int slotDimension 
+    public Vector2Int slotDimension
     { get; private set; }
     /// <summary> Dimension of the inventory grid. </summary>
-    public Vector2Int gridDimension 
+    public Vector2Int gridDimension
     { get; private set; }
     /// <summary> Preview grid used for generating the item images.. </summary>
-    public PreviewGrid previewGrid 
+    public PreviewGrid previewGrid
     { get => previewGridGameObject.GetComponent<PreviewGrid>(); }
-    
+
     // TODO - Move these to PlayerInventory.
     /// <summary> Reference to the currently selected item. </summary>
     public ItemVisual selectedItem
@@ -92,7 +92,7 @@ public class InventoryManager : MonoBehaviour
         set => SetAvailableCurrency(value);
     }
 
-#endregion // Internal
+    #endregion // Internal
 
     /// <summary> Called when the script instance is first loaded. </summary>
     private void Awake()
@@ -103,7 +103,7 @@ public class InventoryManager : MonoBehaviour
         else
         { sInstance = this; SetupInventory(); }
     }
-    
+
     /// <summary> Called before the first frame update. </summary>
     void Start()
     { }
@@ -121,20 +121,20 @@ public class InventoryManager : MonoBehaviour
     private async void SetupInventory()
     {
         inventoryReady = false;
-        
+
         mRoot = GetComponentInChildren<UIDocument>().rootVisualElement;
         mRoot.style.visibility = Visibility.Hidden;
         //mRoot.style.display = DisplayStyle.None;
-        
+
         mInventoryGrid = mRoot.Q<VisualElement>("InventoryGrid");
 
         mCurrencyValue = mRoot.Q<Label>("CurrencyValue");
-        
+
         var itemDetails = mRoot.Q<VisualElement>("ItemDetailContainer");
         mItemDetailName = itemDetails.Q<Label>("ItemDetailName");
         mItemDetailDescription = itemDetails.Q<Label>("ItemDetailDescription");
         mItemDetailCost = itemDetails.Q<Label>("ItemDetailCost");
-        
+
         /*
          * Task 2c: Link the Button
          *
@@ -153,23 +153,25 @@ public class InventoryManager : MonoBehaviour
          * this is that whenever we press the button, CreateItem() will
          * be called.
          */
-        
-        
-        
-        
+
+        mItemCreateButton = itemDetails.Q<Button>("Button");
+        mItemCreateButton.clicked += () => CreateItem();
+
+
+
         await UniTask.WaitForEndOfFrame();
 
         var gridSlots = mInventoryGrid.Children();
         var gridCols = gridSlots.Distinct(slot => slot.worldBound.x).Count();
         var gridRows = gridSlots.Distinct(slot => slot.worldBound.y).Count();
         gridDimension = new Vector2Int(gridCols, gridRows);
-        
+
         var firstSlot = gridSlots.First();
         slotDimension = new Vector2Int(
             Mathf.RoundToInt(firstSlot.worldBound.width),
             Mathf.RoundToInt(firstSlot.worldBound.height)
         );
-        
+
         mGridHighlight = new VisualElement
         {
             name = "Highlight",
@@ -180,9 +182,9 @@ public class InventoryManager : MonoBehaviour
         };
         mGridHighlight.AddToClassList("inventory_slot_highlight");
         mInventoryGrid.Add(mGridHighlight);
-        
+
         UpdateSelectedItem(null);
-        
+
         inventoryReady = true;
     }
 
@@ -196,7 +198,7 @@ public class InventoryManager : MonoBehaviour
         if (inventoryReady)
         { mRoot.style.visibility = Visibility.Hidden; }
     }
-    
+
     /// <summary> Hide the inventory. </summary>
     public async void DisplayInventory()
     {
@@ -210,38 +212,38 @@ public class InventoryManager : MonoBehaviour
                 mRoot.resolvedStyle.height
             );
             var padding = new Vector2(
-                camera.rect.x * originalDimensions.x, 
+                camera.rect.x * originalDimensions.x,
                 camera.rect.y * originalDimensions.y
             );
             mRoot.style.borderLeftWidth = mRoot.style.borderRightWidth = padding.x;
             mRoot.style.borderTopWidth = mRoot.style.borderBottomWidth = padding.y;
-            
+
             await UniTask.WaitForEndOfFrame();
-            
+
             // Recalculate size properties.
             var firstSlot = mInventoryGrid.Children().First();
             slotDimension = new Vector2Int(
                 Mathf.RoundToInt(firstSlot.resolvedStyle.width),
                 Mathf.RoundToInt(firstSlot.resolvedStyle.height)
             );
-            
+
             // Finally, make the inventory UI visible.
-            mRoot.style.visibility = Visibility.Visible; 
+            mRoot.style.visibility = Visibility.Visible;
             inventoryReady = true;
         }
     }
-    
+
     /// <summary> Get grid position based on the local position vector. </summary>
     public Vector2Int GetItemGridPosition(Vector2 localPosition)
     {
         var gridPosition = new Vector2Int(
-            Mathf.RoundToInt(localPosition.x / slotDimension.x), 
+            Mathf.RoundToInt(localPosition.x / slotDimension.x),
             Mathf.RoundToInt(localPosition.y / slotDimension.y)
         );
 
         return gridPosition;
     }
-    
+
     /// <summary> Get grid position based on the local position bounds. </summary>
     public Vector2Int GetItemGridPosition(Rect localBounds)
     { return GetItemGridPosition(new Vector2(localBounds.x, localBounds.y)); }
@@ -254,7 +256,7 @@ public class InventoryManager : MonoBehaviour
     public Vector2Int AddItemToGrid(VisualElement item)
     {
         if (!mCurrentItems.Contains(item))
-        { mCurrentItems.Add(item); mInventoryGrid.Add(item); } 
+        { mCurrentItems.Add(item); mInventoryGrid.Add(item); }
         return GetItemGridPosition(item);
     }
 
@@ -266,7 +268,7 @@ public class InventoryManager : MonoBehaviour
         { mCurrentItems.Remove(item); mInventoryGrid.Remove(item); }
         return itemPosition;
     }
-    
+
     /// <summary> Remove all items from the inventory grid. </summary>
     public void RemoveAllItemsFromGrid()
     {
@@ -274,7 +276,7 @@ public class InventoryManager : MonoBehaviour
         { mInventoryGrid.Remove(item); }
         mCurrentItems.Clear();
     }
-    
+
     /// <summary> Display the highlight over selected location and return potential placement outcome. </summary>
     public (bool canPlace, Vector2 position) ShowPlacementTarget(ItemVisual draggedItem)
     {
@@ -290,13 +292,13 @@ public class InventoryManager : MonoBehaviour
                 return (canPlace: false, position: Vector2.zero);
             }
         }
-        
+
         // Locate the target slot based on collisions with the existing items.
         var overlappingItems = mInventoryGrid.Children().Where(x =>
             x.layout.Overlaps(draggedItem.layout) && x != draggedItem).OrderBy(x =>
             Vector2.Distance(x.worldBound.position,
                 draggedItem.worldBound.position));
-        
+
         if (overlappingItems.Count() > 0)
         { // Overlapping at least one slot.
             // The slot will always be first, followed by the highlight and items.
@@ -307,11 +309,11 @@ public class InventoryManager : MonoBehaviour
             mGridHighlight.style.height = draggedItem.style.height;
             mGridHighlight.style.left = targetSlot.layout.position.x;
             mGridHighlight.style.top = targetSlot.layout.position.y;
-            
+
             var itemOverlaps = mCurrentItems.Where(
                 x => x.layout.Overlaps(mGridHighlight.layout)
             ).ToArray();
-            
+
             if (itemOverlaps.Count() > 1)
             { // Place is already occupied.
                 mGridHighlight.style.visibility = Visibility.Hidden;
@@ -332,7 +334,7 @@ public class InventoryManager : MonoBehaviour
     /// <summary> Move the highlight to be on top of all other elements. </summary>
     public void MoveHighlightToTop()
     { mGridHighlight.BringToFront(); }
-    
+
     /// <summary> Update the currently displayed item description from given item. </summary>
     public void UpdateSelectedItem([CanBeNull] ItemVisual item = null)
     {
@@ -353,14 +355,22 @@ public class InventoryManager : MonoBehaviour
          * Finally, you should also DISABLE the button when we have no item available
          * and provide some default texts to let the player know what to expect.
          */
-        
+
         if (item == null)
         { // We have no item selected -> Provide some default information.
+            mItemDetailName.text = "No item selected";
+            mItemDetailDescription.text = string.Empty;
+            mItemDetailCost.text = string.Empty;
+            mItemCreateButton.SetEnabled(false);
         }
         else
         { // We have item selected -> Use the item information.
+            mItemDetailName.text = item.name;
+            mItemDetailDescription.text = item.definition.readableDescription;
+            mItemDetailCost.text = item.definition.cost.ToString();
+            mItemCreateButton.SetEnabled(true);
         }
-        
+
         selectedItem = item;
     }
 
@@ -391,9 +401,12 @@ public class InventoryManager : MonoBehaviour
          * it from the cost (itemDefinition.cost) from availableCurrency property.
          * These items are not cheap to make!
          */
-        
-        var itemDefinition = selectedItem?.definition;
-        
+        if(selectedItem != null && availableCurrency >= selectedItem.definition.cost)
+        {
+            Instantiate(selectedItem.definition.prefab, createDestination.transform);
+            availableCurrency -= selectedItem.definition.cost;
+            return true;
+        }
         return false;
     }
 }

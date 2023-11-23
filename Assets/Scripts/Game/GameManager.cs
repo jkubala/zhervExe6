@@ -146,6 +146,8 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    private static extern void RefreshPage();
     /// <summary> Quit the game. </summary>
     public void QuitGame()
     {
@@ -165,12 +167,16 @@ public class GameManager : MonoBehaviour
 		 *       WebGL memory or just refreshing the page by reloading the 
 		 *       current URL ("OpenURL", "absoluteURL").
          */
-        
+
 #if UNITY_EDITOR
-        // Quitting in Unity Editor: 
+        // Quitting in Unity Editor:
+        UnityEditor.EditorApplication.isPlaying = false;
 #elif UNITY_WEBPLAYER || UNITY_WEBGL
-        // Quitting in the WebGL build: 
+        RefreshPage();
+        // Quitting in the WebGL build:
+        
 #else // !UNITY_WEBPLAYER
+        Application.Quit();
         // Quitting in all other builds: 
 #endif
     }
