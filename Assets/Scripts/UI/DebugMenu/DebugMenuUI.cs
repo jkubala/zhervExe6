@@ -192,10 +192,7 @@ public class DebugMenuUI : MonoBehaviour
                     }
                     float volume = SoundManager.Instance.masterVolume;
                     volume = (int)GUILayout.HorizontalSlider(volume, -80.0f, 20.0f, GUILayout.ExpandWidth(true));
-                    if (!SoundManager.Instance.masterMuted)
-                    {
-                        SoundManager.Instance.masterVolume = volume;
-                    }
+                    SoundManager.Instance.masterVolume = volume;
                 }
                 GUILayout.EndHorizontal();
 
